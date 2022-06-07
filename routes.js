@@ -16,11 +16,20 @@ router.get('/tweets', async ctx =>{
   }
   try{
     jwt.verify(token, process.env.JWT_SECRET)
-    const tweets = await prisma.tweet.findMany() //Promise
+    const tweets = await prisma.tweet.findMany({
+      include:{
+        user:true
+      }
+    }) //Promise
     ctx.body= tweets
 
   }catch(error){
-    ctx.status = 401
+    if(typeof error === 'JsonWebTokenError'){
+      ctx.status = 401
+      return
+    }
+    
+    ctx.status = 500
     return
   }
 
